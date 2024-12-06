@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from itertools import batched
 from pathlib import Path
 
 
@@ -16,7 +17,7 @@ def load_data(test, test_data, day, lines=False, is_2d=False):
     return ret
 
 
-@dataclass
+@dataclass(frozen=True)
 class Pos:
     x: int
     y: int
@@ -34,7 +35,7 @@ class Pos:
         return Pos(self.x * o, self.y * o)
 
 
-@dataclass
+@dataclass(frozen=True)
 class Dir(Pos):
 
     def rotate(self, clock: bool = True):
@@ -52,20 +53,45 @@ class Dir(Pos):
 
 class DataMatrix:
 
-    def __init__(self, data):
-        self.size_x = data.index("\n")
-        self.data = data.replace("\n", "")
+    def __init__(self, data, size_x: int | None = None, size_y: int | None = None):
+        self.size_x = data.index("\n") if size_x is None else size_x
+        self.size_y = data.count("\n") + 1 if size_y is None else size_y
+        if isinstance(data, str):
+            self.data = list(data.replace("\n", ""))
+        else:
+            self.data = data
 
     def __getitem__(self, idx):
         if isinstance(idx, Pos):
             pos_x = idx[0]
             pos_y = idx[1]
             idx = pos_x + pos_y * self.size_x
-        if isinstance(idx, str):
-            pos = self.data.index(idx)
-            return Pos(x=pos % self.size_x, y=pos // self.size_x)
         return self.data[idx]
 
+    def __setitem__(self, idx, o):
+        if isinstance(idx, Pos):
+            pos_x = idx[0]
+            pos_y = idx[1]
+            idx = pos_x + pos_y * self.size_x
+        self.data[idx] = o
+
+    def index(self, o) -> None | Pos:
+        try:
+            pos = self.data.index(o)
+        except:
+            return None
+        return Pos(pos % self.size_x, pos // self.size_x)
+
     def __contains__(self, pos):
-        if not isinstance(pos, int):
+        if isinstance(pos, int):
             return -1 < pos < len(self.data)
+        return (-1 < pos.x < self.size_x) and (-1 < pos.y < self.size_y)
+
+    def __repr__(self):
+        return "\n".join("".join(l) for l in batched("".join(self.data), self.size_x))
+
+    def replace(self, repl, symbol) -> "DataMatrix":
+        copy = DataMatrix(self.data, self.size_x, self.size_y)
+        for i in repl:
+            copy[i] = symbol
+        return copy
