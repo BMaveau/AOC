@@ -8,8 +8,8 @@ def load_data(test, test_data, day, lines=False, is_2d=False):
         ret = test_data
     else:
         ret = Path.open(f"./input{day}").read()
-    if lines:
-        ret.split("")
+    if ret[-1] == "\n":
+        ret = ret[:-1]
     if lines:
         return ret.split("\n")
     if is_2d:
@@ -95,6 +95,14 @@ class DataMatrix:
         except:
             return None
         return Pos(pos % self.size_x, pos // self.size_x)
+
+    def find(self, symbol, pos, dir) -> None | Pos:
+        new_pos = pos + dir
+        while new_pos != symbol:
+            new_pos += dir
+            if new_pos not in self:
+                return None
+        return new_pos
 
     def __contains__(self, pos):
         if isinstance(pos, int):
