@@ -22,8 +22,15 @@ class Pos:
     x: int
     y: int
 
-    def __add__(self, o: "Pos"):
+    def __add__(self, o: "Pos | int"):
+        if isinstance(o, int):
+            o = Pos(o, o)
         return Pos(self.x + o.x, self.y + o.y)
+
+    def __sub__(self, o: "Pos | int"):
+        if isinstance(o, int):
+            o = Pos(o, o)
+        return Pos(self.x - o.x, self.y - o.y)
 
     def __getitem__(self, idx):
         if idx == 0 or idx == "x":
@@ -34,11 +41,14 @@ class Pos:
     def __mul__(self, o: int):
         return Pos(self.x * o, self.y * o)
 
+    def dist(self, o: "Pos"):
+        return abs(self.x - o.x) + abs(self.y - o.y)
+
 
 @dataclass(frozen=True)
 class Dir(Pos):
 
-    def rotate(self, clock: bool = True):
+    def rotate(self, clock: bool = True) -> "Dir":
         ret = None
         if self.y == -1:
             ret = Dir(1, 0)
@@ -59,14 +69,18 @@ class DataMatrix:
         if isinstance(data, str):
             self.data = list(data.replace("\n", ""))
         else:
-            self.data = data
+            self.data = data[:]
 
     def __getitem__(self, idx):
         if isinstance(idx, Pos):
             pos_x = idx[0]
             pos_y = idx[1]
-            idx = pos_x + pos_y * self.size_x
-        return self.data[idx]
+            _idx = pos_x + pos_y * self.size_x
+        else:
+            _idx = idx
+        if _idx < 0 or _idx >= len(self.data):
+            print(idx, _idx, self.size_x, self.size_y, len(self.data))
+        return self.data[_idx]
 
     def __setitem__(self, idx, o):
         if isinstance(idx, Pos):
