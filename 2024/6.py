@@ -1,5 +1,5 @@
 from collections import deque
-from os import access
+from os import access, stat
 from pathlib import Path
 from re import findall, finditer
 from dataclasses import dataclass
@@ -18,7 +18,7 @@ data = """....#.....
 #.........
 ......#..."""
 
-data = load_data(True, data, "6", is_2d=True)
+data = load_data(False, data, "6", is_2d=True)
 
 
 def proceed(map: DataMatrix, pos: Pos, dir: Dir):
@@ -45,3 +45,42 @@ print(len(passed_pos))
 print(data.replace(passed_pos, "X"))
 
 # Part 2
+
+
+def check_in_loop(data: DataMatrix):
+    start = data.index("^")
+    if start is None:
+        return 0
+    dir = Dir(0, -1)
+    passed = set()
+
+    while (ret := proceed(data, start, dir)) is not None:
+        if ret in passed:
+            return 1
+        passed.add(ret)
+        start = ret[0]
+        dir = ret[1]
+    return 0
+
+
+cnt = 0
+for i in passed_pos:
+    copy = data.replace([i], "#")
+
+    cnt += check_in_loop(copy)
+print(cnt)
+
+
+def check_feasible(data: DataMatrix, pos: Pos, dir: Dir, length: int):
+    if data.index(pos + dir) == ".":
+        next_pos = data.find("#", pos, dir.rotate())
+        if next_pos is None:
+            return False
+        y = next_pos.dist(pos)
+        corner_a = next_pos - dir.rotate()
+        corner_b = corner_a - dir * (length + 1)
+        if data[corner_b] != "#":
+            return False
+        corner_c = pos - dir * length - dir.rotate(clock=False)
+        if data[corner_c] != "#":
+            return False
