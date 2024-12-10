@@ -104,6 +104,15 @@ class DataMatrix:
                 return None
         return new_pos
 
+    def find_iter(self, symbol: str, pos: Pos):
+        _pos = pos.x + pos.y * self.size_x
+        try:
+            while True:
+                _pos = self.data.index(symbol, _pos + 1)
+                yield Pos(_pos % self.size_x, _pos // self.size_x)
+        except ValueError:
+            pass
+
     def __contains__(self, pos):
         if isinstance(pos, int):
             return -1 < pos < len(self.data)
