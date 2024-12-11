@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from itertools import batched
+import math as m
 from pathlib import Path
 
 
@@ -47,6 +48,11 @@ class Pos:
 
 @dataclass(frozen=True)
 class Dir(Pos):
+
+    @classmethod
+    def from_pos(cls, pos: Pos):
+        c = m.gcd(pos.x, pos.y)
+        return Dir(pos.x // c, pos.y // c)
 
     def rotate(self, clock: bool = True) -> "Dir":
         ret = None
