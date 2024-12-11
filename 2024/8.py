@@ -32,3 +32,22 @@ for f in freq:
 
 
 print(len(res))
+
+
+# Part 2
+
+res = set()
+for f in freq:
+    pos = Pos(0, 0)
+    for fa in data.find_iter(f, pos):
+        for fb in data.find_iter(f, fa):
+            dist = aoc.Dir.from_pos(fa - fb)
+            res.add(fa)
+            an = fa
+            while (an := an + dist) in data:
+                res.add(an)
+            an = fa
+            while (an := an - dist) in data:
+                res.add(an)
+
+print(len(res))
