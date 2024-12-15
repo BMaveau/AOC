@@ -127,6 +127,11 @@ class DataMatrix:
     def __repr__(self):
         return "\n".join("".join(l) for l in batched("".join(self.data), self.size_x))
 
+    def __iter__(self):
+        for y in range(self.size_y):
+            for x in range(self.size_x):
+                yield Pos(x, y)
+
     def replace(self, repl, symbol) -> "DataMatrix":
         copy = DataMatrix(self.data, self.size_x, self.size_y)
         for i in repl:
