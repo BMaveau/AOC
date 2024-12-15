@@ -1,4 +1,5 @@
 from aoc import load_data
+from aoc.helpers import cache_results
 
 test = "125 17"
 data = load_data(False, test, 11).split(" ")
@@ -32,32 +33,26 @@ for i in range(25):
 # Part 2
 
 
+@cache_results
 def blink_one(number, n):
-    if (number, n) in blink_one._cached:
-        return blink_one._cached[(number, n)]
-    res: int = 0
     if n == 1:
         if number == "0":
-            res = 1
+            return 1
         elif len(number) % 2 == 0:
-            res = 2
+            return 2
         else:
-            res = 1
+            return 1
     elif number == "0":
-        res = blink_one("1", n - 1)
+        return blink_one("1", n - 1)
     elif len(number) % 2 == 0:
         idx = len(number) // 2
         a = number[:idx]
         b = number[idx:].lstrip("0")
         if b == "":
             b = "0"
-        res = blink_one(a, n - 1) + blink_one(b, n - 1)
+        return blink_one(a, n - 1) + blink_one(b, n - 1)
     else:
-        res = blink_one(str(int(number) * 2024), n - 1)
-    blink_one._cached[(number, n)] = res
-    return res
+        return blink_one(str(int(number) * 2024), n - 1)
 
-
-blink_one._cached = {}
 
 print(sum(blink_one(d, 75) for d in data))
