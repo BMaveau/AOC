@@ -25,6 +25,10 @@ class Pos:
     x: int
     y: int
 
+    def __post_init__(self):
+        object.__setattr__(self, "x", int(self.x))
+        object.__setattr__(self, "y", int(self.y))
+
     def __add__(self, o: "Pos | int"):
         if isinstance(o, int):
             o = Pos(o, o)
