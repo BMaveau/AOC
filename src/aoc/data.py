@@ -4,7 +4,7 @@ import math as m
 from pathlib import Path
 
 
-def load_data(test, test_data, day, lines=False, is_2d=False):
+def load_data(test, test_data, day, lines=False, is_2d=False, grouped_lines=False):
     if test:
         ret = test_data
     else:
@@ -15,6 +15,8 @@ def load_data(test, test_data, day, lines=False, is_2d=False):
         return ret.split("\n")
     if is_2d:
         return DataMatrix(ret)
+    if grouped_lines:
+        return [r.split("\n") for r in ret.split("\n\n")]
     return ret
 
 
