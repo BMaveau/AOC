@@ -42,6 +42,9 @@ class Pos:
     def __mul__(self, o: int):
         return Pos(self.x * o, self.y * o)
 
+    def __rmul__(self, o: int):
+        return self.__mul__(o)
+
     def dist(self, o: "Pos"):
         return abs(self.x - o.x) + abs(self.y - o.y)
 
@@ -118,6 +121,12 @@ class DataMatrix:
                 yield Pos(_pos % self.size_x, _pos // self.size_x)
         except ValueError:
             pass
+
+    def advance_util(self, spos: Pos, dir: Dir, pred):
+        p = spos
+        while pred(p):
+            p += dir
+        return p
 
     def __contains__(self, pos):
         if isinstance(pos, int):
