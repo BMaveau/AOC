@@ -51,6 +51,16 @@ class Pos:
     def __rmul__(self, o: int):
         return self.__mul__(o)
 
+    def __mod__(self, o: "int | Pos | DataMatrix"):
+        if isinstance(o, Pos):
+            size_x, size_y = o.x, o.y
+        elif isinstance(o, DataMatrix):
+            size_x, size_y = o.size_x, o.size_y
+        else:
+            size_x = o
+            size_y = o
+        return Pos(self.x % size_x, self.y % size_y)
+
     def dist(self, o: "Pos"):
         return abs(self.x - o.x) + abs(self.y - o.y)
 
