@@ -1,8 +1,9 @@
 from functools import reduce
 import itertools
-from pathlib import Path
 
-inp = """L68
+from aoc import load_data
+
+test_data = """L68
 L30
 R48
 L5
@@ -12,9 +13,8 @@ L1
 L99
 R14
 L82"""
-inp = inp.split("\n")
 
-inp = Path.open("./input1a.txt").readlines()
+inp = load_data(False, test_data, 1, True)
 pr = [(-1 if val[0] == 'L' else 1 ) *  int(val[1:]) for val in inp]
 
 def rotate_knob(prev, rot):
