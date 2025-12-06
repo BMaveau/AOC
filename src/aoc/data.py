@@ -185,8 +185,11 @@ class DataMatrix(MutableMapping):
             for x in range(self.size_x):
                 yield Pos(x, y)
 
-    def replace(self, repl, symbol) -> "DataMatrix":
-        copy = DataMatrix(self.data, self.size_x, self.size_y)
+    def replace(self, repl, symbol, inplace: bool = False) -> "DataMatrix":
+        if not inplace:
+            copy = DataMatrix(self.data, self.size_x, self.size_y)
+        else:
+            copy = self
         for i in repl:
             copy[i] = symbol
         return copy
