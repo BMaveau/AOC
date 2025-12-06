@@ -115,6 +115,8 @@ class DataMatrix:
             _idx = idx
         if _idx < 0 or _idx >= len(self.data):
             print(idx, _idx, self.size_x, self.size_y, len(self.data))
+            raise KeyError()
+        
         return self.data[_idx]
 
     def __setitem__(self, idx, o):
