@@ -96,7 +96,17 @@ class Dir(Pos):
         return ret if clock else ret * -1
 
 
-class DataMatrix:
+UP = Dir(0, -1)
+DOWN = Dir(0, 1)
+LEFT = Dir(-1, 0)
+RIGHT = Dir(1, 0)
+NE = UP + RIGHT
+SE = DOWN + RIGHT
+SW = DOWN + LEFT
+NW = UP + LEFT
+
+
+class DataMatrix(MutableMapping):
 
     def __init__(self, data, size_x: int | None = None, size_y: int | None = None):
         self.size_x = data.index("\n") if size_x is None else size_x
@@ -105,6 +115,12 @@ class DataMatrix:
             self.data = list(data.replace("\n", ""))
         else:
             self.data = data[:]
+
+    def __len__(self) -> int:
+        return self.size_x * self.size_y
+
+    def __delitem__(self, key, /) -> None:
+        raise NotImplementedError
 
     def __getitem__(self, idx):
         if isinstance(idx, Pos):
