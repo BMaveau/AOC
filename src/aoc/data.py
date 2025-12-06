@@ -71,6 +71,9 @@ class Pos:
             size_y = o
         return Pos(self.x % size_x, self.y % size_y)
 
+    def __neg__(self):
+        return -1 * self
+
     def dist(self, o: "Pos"):
         return abs(self.x - o.x) + abs(self.y - o.y)
 
