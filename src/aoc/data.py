@@ -190,3 +190,38 @@ class DataMatrix(MutableMapping):
         for i in repl:
             copy[i] = symbol
         return copy
+
+    def orthogonal_neighbors(self, pos: Pos) -> list[Pos]:
+        directions = [UP, RIGHT, DOWN, LEFT]
+        if pos.x ==0:
+            directions.remove(LEFT)
+        if pos.x == self.size_x -1:
+            directions.remove(RIGHT)
+        if pos.y == 0:
+            directions.remove(UP)
+        if pos.y == self.size_y - 1:
+            directions.remove(DOWN)
+        return [pos + d for d in directions]
+
+    def diagonal_neighbours(self, pos: Pos) -> list[Pos]:
+        directions = {NE, SE, SW, NW}
+        if pos.x == 0:
+            directions.discard(NW)
+            directions.discard(SW)
+        if pos.x == self.size_x - 1:
+            directions.discard(NE)
+            directions.discard(SE)
+        if pos.y == 0:
+            directions.discard(NE)
+            directions.discard(NW)
+        if pos.y == self.size_y - 1:
+            directions.discard(SE)
+            directions.discard(SW)
+        return [pos + d for d in directions]
+
+    def neighbors(self, pos) -> list[Pos]:
+        neighbors = self.orthogonal_neighbors(pos) +  self.diagonal_neighbours(pos)
+        if len(neighbors) not in [3, 5, 8]:
+            breakpoint()
+            pass
+        return neighbors
