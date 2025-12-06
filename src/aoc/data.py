@@ -18,7 +18,7 @@ def load_data(test, test_data, day, lines=False, is_2d=False, grouped_lines=Fals
     if test:
         ret = test_data
     else:
-        ret = Path.open(f"./input{day}").read()
+        ret = Path(f"./input{day}").read_text()
     if ret[-1] == "\n":
         ret = ret[:-1]
     if lines:
