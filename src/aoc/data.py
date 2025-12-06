@@ -2,7 +2,17 @@ from dataclasses import dataclass
 from itertools import batched
 import math as m
 from pathlib import Path
+from typing import Callable, Literal, MutableMapping, overload
 
+
+@overload
+def load_data(test: bool, test_data: str, day: int, lines: Literal[True] = ..., is_2d: Literal[False] = ..., grouped_lines: Literal[False] = ...) -> list[str]: ...
+
+@overload
+def load_data(test: bool, test_data: str, day: int, lines: Literal[False] = ..., is_2d: Literal[True] = ..., grouped_lines: Literal[False] = ...) -> "DataMatrix": ...
+
+@overload
+def load_data(test: bool, test_data: str, day: int, lines: Literal[False] = ..., is_2d: Literal[False] = ..., grouped_lines: Literal[True] = ...) -> list[list[str]]: ...
 
 def load_data(test, test_data, day, lines=False, is_2d=False, grouped_lines=False):
     if test:
