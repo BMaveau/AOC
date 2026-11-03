@@ -1,18 +1,44 @@
+import math as m
+from collections import defaultdict
+from collections.abc import Callable, MutableMapping
 from dataclasses import dataclass
 from itertools import batched
-import math as m
 from pathlib import Path
-from typing import Callable, Literal, MutableMapping, overload
+from typing import Literal, overload
 
 
 @overload
-def load_data(test: bool, test_data: str, day: int, lines: Literal[True] = ..., is_2d: Literal[False] = ..., grouped_lines: Literal[False] = ...) -> list[str]: ...
+def load_data(
+    test: bool,
+    test_data: str,
+    day: int,
+    lines: Literal[True] = ...,
+    is_2d: Literal[False] = ...,
+    grouped_lines: Literal[False] = ...,
+) -> list[str]: ...
+
 
 @overload
-def load_data(test: bool, test_data: str, day: int, lines: Literal[False] = ..., is_2d: Literal[True] = ..., grouped_lines: Literal[False] = ...) -> "DataMatrix": ...
+def load_data(
+    test: bool,
+    test_data: str,
+    day: int,
+    lines: Literal[False] = ...,
+    is_2d: Literal[True] = ...,
+    grouped_lines: Literal[False] = ...,
+) -> "DataMatrix": ...
+
 
 @overload
-def load_data(test: bool, test_data: str, day: int, lines: Literal[False] = ..., is_2d: Literal[False] = ..., grouped_lines: Literal[True] = ...) -> list[list[str]]: ...
+def load_data(
+    test: bool,
+    test_data: str,
+    day: int,
+    lines: Literal[False] = ...,
+    is_2d: Literal[False] = ...,
+    grouped_lines: Literal[True] = ...,
+) -> list[list[str]]: ...
+
 
 def load_data(test, test_data, day, lines=False, is_2d=False, grouped_lines=False):
     if test:
@@ -74,13 +100,18 @@ class Pos:
     def __neg__(self):
         return -1 * self
 
+    def __len__(self):
+        return 2
+
     def dist(self, o: "Pos"):
         return abs(self.x - o.x) + abs(self.y - o.y)
+
+    def tuple(self):
+        return (self.x, self.y)
 
 
 @dataclass(frozen=True)
 class Dir(Pos):
-
     @classmethod
     def from_pos(cls, pos: Pos):
         c = m.gcd(pos.x, pos.y)
@@ -110,7 +141,6 @@ NW = UP + LEFT
 
 
 class DataMatrix(MutableMapping):
-
     def __init__(self, data, size_x: int | None = None, size_y: int | None = None):
         self.size_x = data.index("\n") if size_x is None else size_x
         self.size_y = data.count("\n") + 1 if size_y is None else size_y
@@ -130,16 +160,36 @@ class DataMatrix(MutableMapping):
             pos_x = idx[0]
             pos_y = idx[1]
             _idx = pos_x + pos_y * self.size_x
+        elif isinstance(idx, tuple):
+            return self.get_item_range(*idx)
         else:
             _idx = idx
         if _idx < 0 or _idx >= len(self.data):
             print(idx, _idx, self.size_x, self.size_y, len(self.data))
             raise KeyError()
-        
+
         return self.data[_idx]
 
+    def get_item_range(self, range_x, range_y):
+        if isinstance(range_x, Pos):
+            return self[range_x.x, range_y]
+        if isinstance(range_y, Pos):
+            return self[range_x, range_y.y]
+        if isinstance(range_x, slice):
+            res = []
+            for idx_x in list(range(self.size_x))[range_x]:
+                res += list(self[idx_x, range_y])
+            return res
+        if isinstance(range_y, slice):
+            res = []
+            for idx_y in list(range(self.size_y))[range_y]:
+                res += list(self[range_x, idx_y])
+            return res
+
+        return self[Pos(range_x, range_y)]
+
     def __setitem__(self, idx, o):
-        if isinstance(idx, Pos):
+        if isinstance(idx, (Pos, tuple)):
             pos_x = idx[0]
             pos_y = idx[1]
             idx = pos_x + pos_y * self.size_x
@@ -199,9 +249,9 @@ class DataMatrix(MutableMapping):
 
     def orthogonal_neighbors(self, pos: Pos) -> list[Pos]:
         directions = [UP, RIGHT, DOWN, LEFT]
-        if pos.x ==0:
+        if pos.x == 0:
             directions.remove(LEFT)
-        if pos.x == self.size_x -1:
+        if pos.x == self.size_x - 1:
             directions.remove(RIGHT)
         if pos.y == 0:
             directions.remove(UP)
@@ -226,8 +276,48 @@ class DataMatrix(MutableMapping):
         return [pos + d for d in directions]
 
     def neighbors(self, pos) -> list[Pos]:
-        neighbors = self.orthogonal_neighbors(pos) +  self.diagonal_neighbours(pos)
+        neighbors = self.orthogonal_neighbors(pos) + self.diagonal_neighbours(pos)
         if len(neighbors) not in [3, 5, 8]:
             breakpoint()
-            pass
         return neighbors
+
+    def find_path_dijkstra(
+        self,
+        start: Pos,
+        goal: Pos,
+        cost: Callable[["DataMatrix", Pos, Pos], int],
+        wall="#",
+    ):
+        passed_steps: dict[Pos, int] = defaultdict(default_factory=1000000000000)
+        passed_steps[start] = 0
+        while True:
+            el = min(passed_steps.items(), key=lambda k: k[1])
+            if el == goal:
+                break
+            # Get el neighbours
+            # Determine cost of going to neighbour from el
+            #
+
+            res = cost(self, el)
+            for r in res:
+                passed_steps[r[0]] = min(r[1])
+
+    # def find_path_astar(
+    #     self, start, goal, wall="#", cost=lambda _: 1, ecost=lambda __: 1
+    # ):
+    #     to_parse = [([start], ecost([start]))]
+    #     pdir = [UP, RIGHT, DOWN, LEFT]
+
+    #     while len(to_parse) != 0:
+    #         el = min(to_parse, key=lambda k: k[1])
+    #         p, pcost = el
+
+
+#         to_parse.remove(el)
+#         for d in pdir:
+#             if p[-1] + d not in p and p[-1] + d in self and self[p[-1] + d] != wall:
+#                 npath = p + [p[-1] + d]
+#                 npath = (npath, pcost + cost(npath) + ecost(npath))
+#                 to_parse.append(npath)
+#                 if p[-1] + d == goal:
+#                     return npath[0], pcost + cost(npath[0])
