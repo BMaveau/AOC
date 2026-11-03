@@ -34,8 +34,8 @@ for a, b in combinations(enumerate(pos), 2):
 
 G = nx.Graph()
 G.add_nodes_from(list(range(len(pos))))
-for boxes in sorted(distances.items(), key=lambda it: it[1])[:1000]:
-    print(boxes[0])
+distances = sorted(distances.items(), key=lambda it: it[1])
+for boxes in distances[:1000]:
     G.add_edge(*boxes[0])
 
 print(
@@ -46,6 +46,17 @@ print(
         ]
     )
 )
+
+
+for boxes in distances[1000:]:
+    G.add_edge(*boxes[0])
+    if nx.is_connected(G):
+        pos_a = pos[boxes[0][0]]
+        pos_b = pos[boxes[0][1]]
+        print(pos_a[0] * pos_b[0])
+        break
+
+
 # Too low
 # 1024
 # Too high
