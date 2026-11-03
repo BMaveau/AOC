@@ -21,3 +21,4 @@ aoc = { path = ".", editable = true }
 [tool.pixi.dependencies]
 ruff = ">=0.17.3,<0.18"
 ty = ">=0.0.96,<0.0.97"
+networkx = ">=3.7,<4"
